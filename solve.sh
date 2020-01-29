@@ -7,8 +7,10 @@
 # Interface of Sudoku's table solver, it compiles the sudoku.c
 # program and controls the input and output of the program
 
-# If solver's executable does not exist, create one
-if ! [ -f sudoku ];then
+# If solver's executable does not exist or sudoku.c is newer than
+# the executable, create one
+if ! [ -f sudoku ] || [ sudoku.c -nt sudoku ];then
+    echo "Creating executable 'sudoku'..."
     gcc sudoku.c -o sudoku
 fi
 
