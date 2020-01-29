@@ -215,10 +215,12 @@ int main(){
        } 
     }
     int valid = table_validation(matrix);
+    /* It exits with 2 if table is not valid */
     if (valid == 0)
-        exit(1);
-    int solved = solve(0,0,matrix);
-    if (solved == 0)
         exit(2);
+    int solved = solve(0,0,matrix);
+    /* It exits with 3 if table has no solution. */
+    if (solved == 0)
+        exit(3);
 }
     
