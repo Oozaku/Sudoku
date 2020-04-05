@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <omp.h>
+#include <string.h>
 /*
 sudoku.c
 Created by Oozaku
@@ -209,9 +210,10 @@ int main(){
     printf("table solved? %i\n",solved);
     */
     int i,j,matrix[9][9];
+    char garbage;
     for (i=0;i<9;i++){
        for (j=0;j<9;j++){
-            scanf("%d",&matrix[i][j]);
+            scanf("%d%c",&matrix[i][j],&garbage);
        } 
     }
     int valid = table_validation(matrix);
@@ -219,7 +221,52 @@ int main(){
     if (valid == 0)
         exit(2);
     double start = omp_get_wtime();
-    int solved = solve(0,0,matrix);
+    int sum = 0,line=0,column=0,finish=0;
+    for (i=0;i<9;i++){
+        for (j=0;j<9;j++){
+            sum = 0;
+            int *available = choices(i,j,matrix);
+            int k;
+            for (k=0;k<9;k++){
+                sum += available[k];
+            }
+            if (sum >= 6){
+                line = i;
+                column = j;
+                finish++;
+                break;
+            }
+            free(available);
+        }
+        if (finish != 0)
+            break;
+    }
+    int solved = 0;
+    int *available = choices(line,column,matrix);
+#   pragma omp parallel default(none) \
+    shared(matrix,line,column,available,solved)
+    {
+#       pragma omp single nowait
+        {
+            int i;
+            for (i=0;i<9;i++){
+                if (available[i] == 1){
+#                   pragma omp task
+                    {
+                        int copy[9][9];
+                        memcpy(copy,matrix, 9*9*sizeof(int));
+                        copy[line][column] = i+1;
+                        int solved2;
+                        if (solved == 0)
+                            solved2 = solve(0,0,copy);
+                        if (solved2 == 1){
+                            solved = 1;
+                        }
+                    }
+                }
+            }
+        }
+    }
     double end = omp_get_wtime();
     printf("%lf\n",end-start);
     /* It exits with 3 if table has no solution. */

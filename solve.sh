@@ -11,7 +11,7 @@
 # the executable, create one
 if ! [ -f sudoku ] || [ sudoku.c -nt sudoku ];then
     echo "Creating executable 'sudoku'..."
-    gcc sudoku.c -o sudoku
+    gcc sudoku.c -fopenmp -Wall -o sudoku
 fi
 
 # If compilation goes wrong, print message before exiting
